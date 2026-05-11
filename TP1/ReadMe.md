@@ -1,6 +1,5 @@
 # TP1 — Contrôle d’accès et vérifications d’interface
 
-
 ## Objectifs :
 Vérifie de façon automatique :
 - l’authentification utilisateur sur la page login,
