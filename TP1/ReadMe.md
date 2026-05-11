@@ -1,5 +1,9 @@
 # TP1 — Contrôle d’accès et vérifications d’interface
 
+## Commande pour lancer le projet :
+cd TP1
+python main.py
+
 ## Objectifs :
 Vérifie de façon automatique :
 - l’authentification utilisateur sur la page login,
