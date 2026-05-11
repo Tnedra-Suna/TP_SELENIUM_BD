@@ -1,8 +1,8 @@
 # TP2 — Tester des contenus dynamiques avec Selenium
 
 ## Commande pour lancer le projet :
-cd TP2
-python main.py 
+'cd TP2'
+'python main.py'
 
 ## Objectifs :
 * valider la disparition et la réapparition d’un élément,
