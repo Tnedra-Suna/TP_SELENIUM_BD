@@ -1,0 +1,144 @@
+# ## TP Recherche Basique et Extraction de Données
+# **Site**: practicesoftwaretesting.com
+# **Objectif**: Automatiser une recherche simple et extraire les résultats
+# **Tâches**:
+
+# 1. **Navigation et Localisation**
+#    - Accédez à https://practicesoftwaretesting.com
+#    - Localisez le formulaire de recherche principal
+#    - Identifiez le champ texte de recherche
+#    - Identifiez le bouton de recherche
+#    - Vérifiez que ces éléments sont visibles
+
+# 2. **Recherche de Produits**
+#    - Saisissez "hammer" dans le champ de recherche
+#    - Attendez explicitement la soumission
+#    - Attendez que les résultats de recherche se chargent
+#    - Vérifiez que vous êtes sur la page de résultats
+#    - Vérifiez qu'au moins un résultat est affiché
+
+# 3. **Extraction de Données**
+#    - Localisez le conteneur des produits
+#    - Pour chaque produit affiché:
+#      - Extrayez le nom du produit
+#      - Extrayez le prix du produit
+#      - Extrayez la note (si disponible)
+#    - Créez une liste Python contenant tous les produits avec leurs infos
+
+# 4. **Validation et Rapport**
+#    - Affichez le nombre total de résultats trouvés
+#    - Affichez les 3 premiers produits avec leurs prix
+#    - Affichez le produit le moins cher
+#    - Affichez le produit le plus cher
+
+# **Points de Contrôle**:
+# - La recherche s'exécute correctement
+# - Les résultats sont chargés
+# - Les données sont extraites sans erreur
+# - Le tri et l'affichage fonctionnent
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+import time
+
+driver = webdriver.Chrome()
+wait = WebDriverWait(driver, 10)
+
+try:
+# 1. **Navigation et Localisation**
+    print("TÂCHE 1 — Navigation et Localisation")
+    
+    #    - Accédez à https://practicesoftwaretesting.com
+    driver.get("https://practicesoftwaretesting.com")
+    
+    #    - Localisez le formulaire de recherche principal
+    #    - Identifiez le champ texte de recherche
+    search_query = wait.until(EC.visibility_of_element_located((By.ID, "search-query")))
+
+    #    - Identifiez le bouton de recherche
+    search_button = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "button[data-test='search-submit']")))
+    
+    #    - Vérifiez que ces éléments sont visibles
+    print(f"Champ de recherche visible : {search_query.is_displayed()}")
+    print(f"Bouton de recherche visible : {search_button.is_displayed()}")
+    
+# 2. **Recherche de Produits** (possible de faire le lien avec une base_page pour les fonctions)
+    print("\nTÂCHE 2 — Recherche de Produits")
+    
+    #    - Saisissez "hammer" dans le champ de recherche
+    search_query.clear()
+    search_query.send_keys("hammer")
+    print("Saisie de hammer")
+    
+    #    - Attendez explicitement la soumission
+    search_button.click()
+ 
+    #    - Attendez que les résultats de recherche se chargent 
+    wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.card")))
+    print("Résultats complétement chargés")
+    
+    #    - Vérifiez que vous êtes sur la page de résultats
+    wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "[data-test='search_completed']")))
+    print("Nous sommes bien sur la page de résultats")
+    
+    #    - Vérifiez qu'au moins un résultat est affiché
+    search_result = driver.find_elements(By.CSS_SELECTOR, "[data-test='product-name']")
+    assert len(search_result) >= 1, "Aucun résultat affiché !"
+    print(f"Nombre de résultats affichés : {len(search_result)}")
+
+# 3. **Extraction de Données**
+    print("\nTÂCHE 3 — Extraction de Données")
+    
+#    - Localisez le conteneur des produits
+    product_cards = driver.find_elements(By.CSS_SELECTOR, "a.card")
+    print(f"Cards produit trouvées : {len(product_cards)}")
+
+#    - Pour chaque produit affiché: nom / prix / note (si disponible) - Créez une liste Python contenant tous les produits avec leurs infos
+    produits = []
+    for card in product_cards:
+        nom = card.find_element(By.CSS_SELECTOR, "[data-test='product-name']").text.strip()
+
+        prix_txt = card.find_element(By.CSS_SELECTOR, "[data-test='product-price']").text.strip()
+        prix = float(prix_txt.replace("$", "").replace(",", ".").strip())
+        
+        # Note si dispo --> protection dans un try catch
+        try:
+            note_elem = card.find_element(By.CSS_SELECTOR, ".co2-letter.active")
+            note = note_elem.text.strip()
+        except Exception:
+            note = "Pas de note"
+
+        produit = {"nom": nom, "prix": prix, "prix_affiche": prix_txt, "note": note}
+        produits.append(produit)
+        print(f"{nom} | {prix_txt} | Note : {note}")
+
+# 4. **Validation et Rapport**
+    print("\nTÂCHE 4 — Validation et Rapport")
+
+#    - Affichez le nombre total de résultats trouvés
+    print(f"\nNombre total de résultats trouvés : {len(produits)}")
+    
+#    - Affichez les 3 premiers produits avec leurs prix
+    print("\nLes 3 premiers produits :")
+    for i, p in enumerate(produits[:3], start=1):
+        print(f"  {i}. {p['nom']} à {p['prix_affiche']}")
+
+#    - Affichez le produit le moins cher
+    moins_cher = min(produits, key=lambda p: p["prix"])
+    print(f"\nProduit le moins cher : {moins_cher['nom']} à {moins_cher['prix_affiche']}")
+
+#    - Affichez le produit le plus cher
+    plus_cher  = max(produits, key=lambda p: p["prix"])
+    print(f"Produit le plus cher  : {plus_cher['nom']} à {plus_cher['prix_affiche']}")
+
+except Exception as e:
+    print(f"Erreur : {e}")
+
+finally:
+    print("\n6. Fermeture...")
+    driver.quit()
+    print("    Fermé")
